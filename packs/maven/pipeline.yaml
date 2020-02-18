@@ -27,7 +27,7 @@ pipelines:
       steps:
       - sh: skaffold version
         name: skaffold-version
-      - sh: echo 'hello;
+      - sh: echo 'hello'
         name: echo hello
       - sh: export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml
         name: container-build
