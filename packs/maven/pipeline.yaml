@@ -45,6 +45,9 @@ pipelines:
         - comment: promote through all 'Auto' promotion Environments
           sh: jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)
           name: jx-promote
+        - comment: promote to UAT
+          sh: jx promote -b --timeout 1h --version \$(cat ../../VERSION) --env=uat
+          name: jx-promote-uat
 
   feature:
     build:
