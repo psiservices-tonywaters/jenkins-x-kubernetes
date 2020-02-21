@@ -2,33 +2,35 @@ extends:
   import: classic
   file: maven/pipeline.yaml
 pipelines:
-  pullRequest:
-    build:
-      steps:
-      - sh: skaffold version
-        name: skaffold-version
-      - sh: export VERSION=$PREVIEW_VERSION && skaffold build -f skaffold.yaml
-        name: container-build
-    postBuild:
-      steps:
-      - sh: jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION
-        name: post-build
-    promote:
-      steps:
-      - dir: charts/preview
-        steps:
-        - sh: make preview
-          name: make-preview
-        - sh: jx preview --app $APP_NAME --dir ../..
-          name: jx-preview
+#  pullRequest:
+#    build:
+#      steps:
+#      - sh: echo '******* PULL REQUEST BUILD *******'
+#        name: echo-pull-request-build
+#      - sh: skaffold version
+#        name: skaffold-version
+#      - sh: export VERSION=$PREVIEW_VERSION && skaffold build -f skaffold.yaml
+#        name: container-build
+#    postBuild:
+#      steps:
+#      - sh: jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:$PREVIEW_VERSION
+#        name: post-build
+#    promote:
+#      steps:
+#      - dir: charts/preview
+#        steps:
+#        - sh: make preview
+#          name: make-preview
+#        - sh: jx preview --app $APP_NAME --dir ../..-
+#          name: jx-preview
 
   release:
     build:
       steps:
       - sh: skaffold version
         name: skaffold-version
-      - sh: echo 'hello'
-        name: echo hello
+      - sh: echo '******* RELEASE *******'
+        name: echo-release-build
       - sh: export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml
         name: container-build
       - sh: jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)
@@ -37,41 +39,45 @@ pipelines:
       steps:
       - dir: charts/REPLACE_ME_APP_NAME
         steps:
+        - sh: echo '******* PROMOTE *******'
+          name: echo-promote
         - sh: jx step changelog --version v\$(cat ../../VERSION)
           name: changelog
         - comment: release the helm chart
           sh: jx step helm release
           name: helm-release
-#        - comment: promote through all 'Auto' promotion Environments
-#          sh: jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)
-#          name: jx-promote
-        - comment: promote to QA
-          sh: jx promote -b --timeout 1h --version \$(cat ../../VERSION) --env=qa
-          name: jx-promote-qa
-        - comment: promote to UAT
-          sh: jx promote -b --timeout 1h --version \$(cat ../../VERSION) --env=uat
-          name: jx-promote-uat
+        - comment: promote through all 'Auto' promotion Environments
+          sh: jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)
+          name: jx-promote
+#        - comment: promote to QA
+#          sh: jx promote -b --timeout 1h --version \$(cat ../../VERSION) --env=qa
+#          name: jx-promote-qa
+#        - comment: promote to UAT
+#          sh: jx promote -b --timeout 1h --version \$(cat ../../VERSION) --env=uat
+#          name: jx-promote-uat
 
-  feature:
-    build:
-      steps:
-        - sh: skaffold version
-          name: skaffold-version
-        - sh: echo 'hello feature'
-          name: echo hello feature
-        - sh: export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml
-          name: container-build
-        - sh: jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)
-          name: post-build
-    promote:
-      steps:
-        - dir: charts/REPLACE_ME_APP_NAME
-          steps:
-            - sh: jx step changelog --version v\$(cat ../../VERSION)
-              name: changelog
-            - comment: release the helm chart
-              sh: jx step helm release
-              name: helm-release
-            - comment: promote through all 'Auto' promotion Environments
-              sh: jx promote -b --all-auto --timeout 1h --version \$(cat ../../VERSION)
-              name: jx-promote
+#  feature:
+#    build:
+#      steps:
+#        - sh: echo '******* FEATURE BUILD *******'
+#          name: echo-feature-build
+#        - sh: skaffold version
+#          name: skaffold-version
+#        - sh: export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml
+#          name: container-build
+#        - sh: jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)
+#          name: post-build
+#    promote:
+#      steps:
+#        - dir: charts/REPLACE_ME_APP_NAME
+#          steps:
+#            - sh: echo '******* FEATURE PROMOTE *******'
+#              name: echo-feature-promote
+#            - sh: jx step changelog --version v\$(cat ../../VERSION)
+#              name: changelog
+#            - comment: release the helm chart
+#              sh: jx step helm release
+#              name: helm-release
+#            - comment: promote to Develop
+#              sh: jx promote -b --timeout 1h --version \$(cat ../../VERSION) --env=develop
+#              name: jx-promote-develop
